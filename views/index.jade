@@ -1,0 +1,13 @@
+extends layout
+
+block content
+  h1= title
+  p Welcome to #{title}
+  a(class="btn", id="apagar", href="#").
+    Apagar
+  p AA
+  a(class="btn", id="prender", href="#").
+    Prender
+
+  script(src='/javascripts/libs/jquery-2.1.0.min.js')
+  script(src='/javascripts/events.js')
