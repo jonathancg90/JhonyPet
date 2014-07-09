@@ -485,7 +485,7 @@ exports["Led.RGB"] = {
       board: this.board
     });
 
-    this.spy = sinon.spy(this.board.io, "analogWrite");
+    this.analog = sinon.spy(this.board.io, "analogWrite");
 
     this.proto = [{
       name: "on"
@@ -505,6 +505,8 @@ exports["Led.RGB"] = {
       name: "fadeOut"
     }, {
       name: "strobe"
+    }, {
+      name: "blink"
     }, {
       name: "stop"
     }];
@@ -542,28 +544,48 @@ exports["Led.RGB"] = {
     test.expect(9);
 
     this.ledRgb.color("#0000ff");
-    test.ok(this.spy.calledWith(redPin, 0x00));
-    test.ok(this.spy.calledWith(greenPin, 0x00));
-    test.ok(this.spy.calledWith(bluePin, 0xff));
+    test.ok(this.analog.calledWith(redPin, 0x00));
+    test.ok(this.analog.calledWith(greenPin, 0x00));
+    test.ok(this.analog.calledWith(bluePin, 0xff));
 
     this.ledRgb.color("#ffff00");
-    test.ok(this.spy.calledWith(redPin, 0xff));
-    test.ok(this.spy.calledWith(greenPin, 0xff));
-    test.ok(this.spy.calledWith(bluePin, 0x00));
+    test.ok(this.analog.calledWith(redPin, 0xff));
+    test.ok(this.analog.calledWith(greenPin, 0xff));
+    test.ok(this.analog.calledWith(bluePin, 0x00));
 
     this.ledRgb.color("#bbccaa");
-    test.ok(this.spy.calledWith(redPin, 0xbb));
-    test.ok(this.spy.calledWith(greenPin, 0xcc));
-    test.ok(this.spy.calledWith(bluePin, 0xaa));
+    test.ok(this.analog.calledWith(redPin, 0xbb));
+    test.ok(this.analog.calledWith(greenPin, 0xcc));
+    test.ok(this.analog.calledWith(bluePin, 0xaa));
 
     test.done();
   },
 
+  mixinArgs: function(test) {
+    var redPin = 9,
+      greenPin = 10,
+      bluePin = 11;
+
+    test.expect(6);
+
+    this.ledRgb.brightness(255);
+
+    test.ok(this.analog.calledWith(redPin, 255));
+    test.ok(this.analog.calledWith(greenPin, 255));
+    test.ok(this.analog.calledWith(bluePin, 255));
+
+    this.ledRgb.brightness(0);
+    test.ok(this.analog.calledWith(redPin, 0));
+    test.ok(this.analog.calledWith(greenPin, 0));
+    test.ok(this.analog.calledWith(bluePin, 0));
+
+    test.done();
+  },
   on: function(test) {
     test.expect(1);
 
     this.ledRgb.on();
-    test.ok(this.spy.calledWith(11, 255));
+    test.ok(this.analog.calledWith(11, 255));
 
     test.done();
   },
@@ -572,8 +594,14 @@ exports["Led.RGB"] = {
     test.expect(1);
 
     this.ledRgb.off();
-    test.ok(this.spy.calledWith(11, 0));
+    test.ok(this.analog.calledWith(11, 0));
 
+    test.done();
+  },
+
+  blink: function(test) {
+    test.expect(1);
+    test.equal(this.ledRgb.blink, this.ledRgb.strobe);
     test.done();
   }
 
@@ -595,10 +623,10 @@ exports["Led.RGB - Common Anode"] = {
     });
 
     this.io = {
-      analogWrite: function (pin, value) {}
+      analogWrite: function(pin, value) {}
     };
 
-    this.board.io.analogWrite = function (pin, value) {
+    this.board.io.analogWrite = function(pin, value) {
       value = 255 - value;
       this.io.analogWrite(pin, value);
     }.bind(this);
@@ -623,6 +651,8 @@ exports["Led.RGB - Common Anode"] = {
       name: "fadeOut"
     }, {
       name: "strobe"
+    }, {
+      name: "blink"
     }, {
       name: "stop"
     }];
@@ -693,6 +723,12 @@ exports["Led.RGB - Common Anode"] = {
     test.ok(this.spy.calledWith(11, 255));
 
     test.done();
+  },
+
+  blink: function(test) {
+    test.expect(1);
+    test.equal(this.ledRgb.blink, this.ledRgb.strobe);
+    test.done();
   }
 
 };
@@ -715,7 +751,9 @@ exports["Led - Default Pin w/ Firmata"] = {
     sinon.stub(five.Board.Pins.prototype, "isPwm").returns(true);
 
     test.equal(new Led(12).mode, 3);
-    test.equal(new Led({ type: "PWM" }).mode, 3);
+    test.equal(new Led({
+      type: "PWM"
+    }).mode, 3);
 
     test.done();
   }

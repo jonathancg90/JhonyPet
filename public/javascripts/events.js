@@ -1,17 +1,20 @@
 var server = 'http://127.0.0.1:3000';
 var socket = io.connect(server);
 
-socket.on('news', function (data) {
-    console.log('hola');
-    console.log(data);
-    socket.emit('my other event', { my: 'data' });
-});
+// socket.on('notificacion', function (data) {
+//     console.log(data);
+    // socket.emit('my other event', { my: 'prueba de BD' });
+// });
 
-$('#apagar').on('click', function(){
+	// socket.on('notification', function (data) {
+	// 	console.log(data)
+	// });
+
+$('#apagar').on('click', function() {
     var socket = io.connect(server);
     socket.emit('apagar', { my: 'data' });
 });
-$('#prender').on('click', function(){
+$('#prender').on('click', function() {
     var socket = io.connect(server);
     socket.emit('prender', { my: 'data' });
 });

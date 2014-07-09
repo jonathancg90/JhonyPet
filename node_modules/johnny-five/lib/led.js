@@ -488,6 +488,7 @@ Led.Array.prototype.each = function(callbackFn) {
   };
 });
 
+Led.Array.prototype.blink = Led.Array.prototype.strobe;
 
 /**
  * Led.RGB
@@ -538,7 +539,7 @@ Led.RGB = function(opts) {
   // Hack: If isAnode invert the analog signals
   if (isAnode) {
     var _analogWrite = this.io.analogWrite;
-    this.io.analogWrite = function (pin, value) {
+    this.io.analogWrite = function(pin, value) {
       value = 255 - Board.constrain(value, 0, 255);
       _analogWrite.call(this, pin, value);
     }.bind(this.io);
@@ -636,13 +637,13 @@ Led.RGB.prototype.off = function() {
     var args = [].slice.call(arguments);
 
     Led.RGB.colors.forEach(function(color) {
-      this[color][method](args);
+      this[color][method].apply(this[color], args);
     }, this);
 
     return this;
   };
 });
 
-
+Led.RGB.prototype.blink = Led.RGB.prototype.strobe;
 
 module.exports = Led;
